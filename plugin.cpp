@@ -28,10 +28,10 @@ std::vector<char> ReadFromSocket(SOCKET socket)
 HRESULT OnVmStarted(const WSLSessionInformation* Session, const WSLVmCreationSettings* Settings)
 {
     g_logfile << "VM created. SessionId=" << Session->SessionId
-        << "CustomConfigurationFlags=" << Settings->CustomConfigurationFlags << std::endl;
+        << ", CustomConfigurationFlags=" << Settings->CustomConfigurationFlags << std::endl;
 
     // Launch cat /proc/version to get the VM's kernel version
-    std::vector<const char*> arguments = {"/bin/cat", "/proc/version", nullptr};
+    std::vector<const char*> arguments = { "/bin/cat", "/proc/version", nullptr };
     SOCKET socket{};
 
     auto result = g_api->ExecuteBinary(Session->SessionId, arguments[0], arguments.data(), &socket);
@@ -96,6 +96,25 @@ HRESULT OnDistroStopping(const WSLSessionInformation* Session, const WSLDistribu
     return S_OK;
 }
 
+HRESULT OnDistroRegistered(const struct WSLSessionInformation* Session, const struct WslOfflineDistributionInformation* Distribution)
+{
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+
+    g_logfile << "Distribution registeredd. SessionId=" << Session->SessionId << ", name=" << converter.to_bytes(Distribution->Name)
+        << ", package=" << converter.to_bytes(Distribution->PackageFamilyName);
+
+    return S_OK;
+}
+
+HRESULT OnDistroUnegistered(const struct WSLSessionInformation* Session, const struct WslOfflineDistributionInformation* Distribution)
+{
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+
+    g_logfile << "Distribution unregistered. SessionId=" << Session->SessionId << ", name=" << converter.to_bytes(Distribution->Name)
+        << ", package=" << converter.to_bytes(Distribution->PackageFamilyName);
+
+    return S_OK;
+}
 
 // Entry point called by wslservice when the plugin is loaded.
 EXTERN_C __declspec(dllexport) HRESULT WSLPLUGINAPI_ENTRYPOINTV1(const WSLPluginAPIV1* Api, WSLPluginHooksV1* Hooks)
@@ -114,14 +133,16 @@ EXTERN_C __declspec(dllexport) HRESULT WSLPLUGINAPI_ENTRYPOINTV1(const WSLPlugin
     g_logfile << "Plugin loaded. WSL version: " << Api->Version.Major << "." << Api->Version.Minor << "." << Api->Version.Revision
         << std::endl;
 
-    // Require WSL >= 2.0.5 since we use WSLDistributionInformation::InitPid
-    WSL_PLUGIN_REQUIRE_VERSION(2, 0, 5, Api);
+    // Require WSL >= 2.1.3 since we OnDistributionRegistered
+    WSL_PLUGIN_REQUIRE_VERSION(2, 1, 3, Api);
 
     // Register the plugin hooks with WSL
     Hooks->OnVMStarted = &OnVmStarted;
     Hooks->OnVMStopping = &OnVmStopping;
     Hooks->OnDistributionStarted = &OnDistroStarted;
     Hooks->OnDistributionStopping = &OnDistroStopping;
+    Hooks->OnDistributionRegistered = &OnDistroRegistered;
+    Hooks->OnDistributionUnregistered = &OnDistroUnegistered;
 
     return S_OK;
 }
