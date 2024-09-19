@@ -3,7 +3,7 @@
 ## Usage
 
 * Build the plugin dll via Visual Studio or msbuild
-* Open a visual studio develloper command prompt as administrator and sign the plugin via: 
+* Open a visual studio developer command prompt as administrator and sign the plugin via:
 `cd path\to\sample-wsl-plugin && powershell .\sign-plugin.ps1 -PluginPath .\x64\Debug\sample-wsl-plugin.dll -Trust`
 
 * Register the plugin with WSL via:
