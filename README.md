@@ -4,10 +4,10 @@
 
 * Build the plugin dll via Visual Studio or msbuild
 * Open a visual studio developer command prompt as administrator and sign the plugin via:
-`cd path\to\sample-wsl-plugin && powershell .\sign-plugin.ps1 -PluginPath .\x64\Debug\sample-wsl-plugin.dll -Trust`
+`cd path\to\wsl-plugin-sample && powershell .\sign-plugin.ps1 -PluginPath .\x64\Debug\sample-wsl-plugin.dll -Trust`
 
 * Register the plugin with WSL via:
-` reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Lxss\Plugins" /v sample-plugin /d path\to\sample-wsl-plugin\x64\Release\sample-wsl-plugin.dll  /t reg_sz
+` reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Lxss\Plugins" /v sample-plugin /d path\to\wsl-plugin-sample\x64\Debug\sample-wsl-plugin.dll  /t reg_sz
 
 * Restart wslservice to load the plugin:
 `sc.exe stop wslservice`
